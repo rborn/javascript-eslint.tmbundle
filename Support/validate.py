@@ -88,6 +88,22 @@ def get_marker_directory():
     return markerDir
 
 
+def update_gutter_marks(issues):
+    mate = os.environ['TM_MATE']
+    file = os.environ['TM_FILEPATH']
+    subprocess.call([mate, '--clear-mark=warning', file])
+    for issue in issues:
+        subprocess.call([mate, '--set-mark=warning:{0}'.format(issue['reason']), '--line={0}'.format(issue['line']), file])
+
+
+def result_message(errorCount, warningCount):
+    parts = []
+    if errorCount > 0:
+        parts.append('{0} error{1}'.format(errorCount, 's' if errorCount > 1 else ''))
+    if warningCount > 0:
+        parts.append('{0} warning{1}'.format(warningCount, 's' if warningCount > 1 else ''))
+    return ', '.join(parts)
+
 def validate(quiet=False):
     # absolute path of this file, used to reference other files
     my_dir = os.path.abspath(os.path.dirname(__file__))
@@ -314,6 +330,9 @@ def validate(quiet=False):
     context['warningCount'] = \
         len([_ for _ in context['issues'] if _['code'][0] == 'W'])
 
+    if 'TM_FILEPATH' in os.environ:
+        update_gutter_marks(issues)
+
     if context['errorCount'] == 0 and context['warningCount'] == 0:
         # There are no errors or warnings. We can bail out if all of
         # the following are True:
@@ -324,6 +343,10 @@ def validate(quiet=False):
         if not os.path.exists(context['markerFile']):
             if quiet:
                 return
+
+    if quiet:
+        print(result_message(context['errorCount'], context['warningCount']))
+        return
 
     # create the marker file
     markerFile = open(context['markerFile'], 'w+')

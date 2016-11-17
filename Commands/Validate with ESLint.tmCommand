@@ -19,7 +19,7 @@ TPY=${TM_PYTHON:-python}
 	<key>inputFormat</key>
 	<string>text</string>
 	<key>keyEquivalent</key>
-	<string>^V</string>
+	<string>^l</string>
 	<key>name</key>
 	<string>Validate with ESLint</string>
 	<key>outputCaret</key>
